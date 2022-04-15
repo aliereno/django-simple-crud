@@ -1,10 +1,11 @@
 import json
+from datetime import datetime
 
 from django.test import Client, TestCase
 from django.urls import reverse
 from rest_framework import status
 
-from book.models import Book
+from book.models import Author, Book, Publisher
 from book.serializers import BookSerializer
 
 client = Client()
@@ -12,10 +13,25 @@ client = Client()
 
 class GetAllBooksTest(TestCase):
     def setUp(self):
-        Book.objects.create(title="Book1", description="Desc1")
-        Book.objects.create(title="Book2", description="Desc2")
-        Book.objects.create(title="Book3", description="Desc3")
-        Book.objects.create(title="Book4", description="Desc4")
+        self.publisher = Publisher.objects.create(
+            name="name",
+            address="address",
+            city="city",
+            country="country",
+            website="website",
+        )
+        Book.objects.create(
+            title="test book 1",
+            description="test book 1 description",
+            publication_date=datetime.now(),
+            publisher=self.publisher,
+        )
+        Book.objects.create(
+            title="test book 2",
+            description="test book 2 description",
+            publication_date=datetime.now(),
+            publisher=self.publisher,
+        )
 
     def test_get_all_books(self):
         # get API response
@@ -29,10 +45,25 @@ class GetAllBooksTest(TestCase):
 
 class GetSingleBookTest(TestCase):
     def setUp(self):
-        self.book1 = Book.objects.create(title="Book1", description="Desc1")
-        self.book2 = Book.objects.create(title="Book2", description="Desc2")
-        self.book3 = Book.objects.create(title="Book3", description="Desc3")
-        self.book4 = Book.objects.create(title="Book4", description="Desc4")
+        self.publisher = Publisher.objects.create(
+            name="name",
+            address="address",
+            city="city",
+            country="country",
+            website="website",
+        )
+        self.book1 = Book.objects.create(
+            title="test book 1",
+            description="test book 1 description",
+            publication_date=datetime.now(),
+            publisher=self.publisher,
+        )
+        self.book2 = Book.objects.create(
+            title="test book 2",
+            description="test book 2 description",
+            publication_date=datetime.now(),
+            publisher=self.publisher,
+        )
 
     def test_get_valid_single_book(self):
         response = client.get(reverse("book:book_detail", kwargs={"pk": self.book2.pk}))
@@ -48,7 +79,39 @@ class GetSingleBookTest(TestCase):
 
 class CreateNewBookTest(TestCase):
     def setUp(self):
-        self.valid_payload = {"title": "Book1", "description": "Book1 Description"}
+        self.publisher = Publisher.objects.create(
+            name="name",
+            address="address",
+            city="city",
+            country="country",
+            website="website",
+        )
+        self.authors = [
+            Author.objects.create(
+                first_name="first_name",
+                last_name="last_name",
+            )
+        ]
+        self.book1 = Book.objects.create(
+            title="test book 1",
+            description="test book 1 description",
+            publication_date=datetime.now(),
+            publisher=self.publisher,
+        )
+        self.book2 = Book.objects.create(
+            title="test book 2",
+            description="test book 2 description",
+            publication_date=datetime.now(),
+            publisher=self.publisher,
+        )
+
+        self.valid_payload = {
+            "title": "Book1",
+            "description": "Book1 Description",
+            "publication_date": "2022-04-15",
+            "publisher_id": self.publisher.pk,
+            "authors_ids": [item.pk for item in self.authors],
+        }
 
         self.invalid_payload = {"title": "", "description": "Book2 Description"}
 
@@ -58,7 +121,7 @@ class CreateNewBookTest(TestCase):
             data=json.dumps(self.valid_payload),
             content_type="application/json",
         )
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
     def test_create_invalid_book(self):
         response = client.post(
@@ -71,12 +134,40 @@ class CreateNewBookTest(TestCase):
 
 class UpdateSingleBookTest(TestCase):
     def setUp(self):
-        self.book1 = Book.objects.create(title="Book1", description="Desc1")
-        self.book2 = Book.objects.create(title="Book2", description="Desc2")
+        self.publisher = Publisher.objects.create(
+            name="name",
+            address="address",
+            city="city",
+            country="country",
+            website="website",
+        )
+        self.authors = [
+            Author.objects.create(
+                first_name="first_name",
+                last_name="last_name",
+            )
+        ]
+        self.book1 = Book.objects.create(
+            title="test book 1",
+            description="test book 1 description",
+            publication_date=datetime.now(),
+            publisher=self.publisher,
+        )
+        self.book2 = Book.objects.create(
+            title="test book 2",
+            description="test book 2 description",
+            publication_date=datetime.now(),
+            publisher=self.publisher,
+        )
+
         self.valid_payload = {
             "title": "Book1",
-            "description": "Book1 Description Update",
+            "description": "Book1 Description",
+            "publication_date": "2022-04-15",
+            "publisher_id": self.publisher.pk,
+            "authors_ids": [item.pk for item in self.authors],
         }
+
         self.invalid_payload = {"title": "", "description": "Book2 Description"}
 
     def test_valid_update_book(self):
@@ -103,8 +194,31 @@ class UpdateSingleBookTest(TestCase):
 
 class DeleteSingleBookTest(TestCase):
     def setUp(self):
-        self.book1 = Book.objects.create(title="Book1", description="Desc1")
-        self.book2 = Book.objects.create(title="Book2", description="Desc2")
+        self.publisher = Publisher.objects.create(
+            name="name",
+            address="address",
+            city="city",
+            country="country",
+            website="website",
+        )
+        self.authors = [
+            Author.objects.create(
+                first_name="first_name",
+                last_name="last_name",
+            )
+        ]
+        self.book1 = Book.objects.create(
+            title="test book 1",
+            description="test book 1 description",
+            publication_date=datetime.now(),
+            publisher=self.publisher,
+        )
+        self.book2 = Book.objects.create(
+            title="test book 2",
+            description="test book 2 description",
+            publication_date=datetime.now(),
+            publisher=self.publisher,
+        )
 
     def test_valid_delete_book(self):
         response = client.delete(

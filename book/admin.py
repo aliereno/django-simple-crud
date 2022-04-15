@@ -3,6 +3,8 @@ Book Admin
 """
 from django.contrib import admin
 
-from book.models import Book
+from book import models
 
-admin.site.register(Book)
+admin.site.register(models.Author)
+admin.site.register(models.Book)
+admin.site.register(models.Publisher)
