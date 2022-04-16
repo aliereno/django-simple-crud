@@ -3,19 +3,21 @@ Views of Book App
 """
 from typing import Any
 
-from rest_framework import status
+from rest_framework import generics, permissions, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from book.serializers import BookSerializer
+from book.models import Author, Publisher
+from book.serializers import AuthorSerializer, BookSerializer, PublisherSerializer
 from book.service import BookService
 
 
 class BookListAPIView(APIView):
     serializer_class = BookSerializer
     paginator = PageNumberPagination()
+    permission_classes = [permissions.AllowAny]
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
@@ -43,6 +45,7 @@ class BookListAPIView(APIView):
 
 class BookDetailAPIView(APIView):
     serializer_class = BookSerializer
+    permission_classes = [permissions.AllowAny]
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
@@ -63,3 +66,27 @@ class BookDetailAPIView(APIView):
         self.book_service.delete_book(pk)
 
         return Response({"message": "Book Deleted Successfully"})
+
+
+class AuthorListCreateAPIView(generics.ListCreateAPIView):
+    queryset = Author.objects.order_by("pk").all()
+    serializer_class = AuthorSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+class AuthorRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Author.objects.order_by("pk").all()
+    serializer_class = AuthorSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+class PublisherListCreateAPIView(generics.ListCreateAPIView):
+    queryset = Author.objects.order_by("pk").all()
+    serializer_class = AuthorSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+class PublisherRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Publisher.objects.order_by("pk").all()
+    serializer_class = PublisherSerializer
+    permission_classes = [permissions.AllowAny]

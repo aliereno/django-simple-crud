@@ -11,7 +11,7 @@ from drf_spectacular.views import (
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/v1/book/", include("book.urls", namespace="v1")),
+    path("api/v1/", include("book.urls", namespace="v1")),
     # DOCS
     path(
         "api/v1/schema/",
