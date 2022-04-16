@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 
 from book.models import Author, Publisher
 from book.serializers import AuthorSerializer, BookSerializer, PublisherSerializer
-from book.service import BookService
+from book.services import BookService
 
 
 class BookListAPIView(APIView):
