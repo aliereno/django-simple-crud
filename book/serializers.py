@@ -3,43 +3,31 @@ Serializers of Book App
 """
 from rest_framework import serializers
 
-from book.models import Author, Book, Publisher
+
+class PublisherSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(max_length=30)
+    address = serializers.CharField(max_length=50)
+    city = serializers.CharField(max_length=60)
+    country = serializers.CharField(max_length=50)
+    website = serializers.CharField(max_length=50)
 
 
-class PublisherSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Publisher
-        fields = "__all__"
+class AuthorSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    first_name = serializers.CharField(max_length=30)
+    last_name = serializers.CharField(max_length=40)
 
 
-class AuthorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Author
-        fields = "__all__"
+class BookSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    title = serializers.CharField(max_length=225, required=True)
+    description = serializers.CharField(required=True)
+    publication_date = serializers.DateField(required=True)
 
-
-class BookSerializer(serializers.ModelSerializer):
     authors = AuthorSerializer(many=True, read_only=True)
     publisher = PublisherSerializer(read_only=True)
-    publisher_id = serializers.PrimaryKeyRelatedField(
-        queryset=Publisher.objects.all(), write_only=True
+    publisher_id = serializers.IntegerField(write_only=True, required=True)
+    authors_ids = serializers.ListField(
+        child=serializers.IntegerField(), write_only=True
     )
-    authors_ids = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Author.objects.all(), write_only=True
-    )
-
-    class Meta:
-        model = Book
-        fields = "__all__"
-
-    def create(self, validated_data):
-        validated_data["publisher"] = validated_data.pop("publisher_id", None)
-        validated_data["authors"] = validated_data.pop("authors_ids", None)
-
-        return super().create(validated_data)
-
-    def update(self, instance, validated_data):
-        validated_data["publisher"] = validated_data.pop("publisher_id", None)
-        validated_data["authors"] = validated_data.pop("authors_ids", None)
-
-        return super().update(instance, validated_data)

@@ -1,40 +1,39 @@
 """
 Models of Book App
 """
-from django.db import models
+from peewee import *
+
+from db.base import BaseModel
 
 
-class Publisher(models.Model):
+class Publisher(BaseModel):
     """Publisher Model"""
 
-    name = models.CharField(max_length=30)
-    address = models.CharField(max_length=50)
-    city = models.CharField(max_length=60)
-    country = models.CharField(max_length=50)
-    website = models.URLField()
+    name = CharField(max_length=30)
+    address = CharField(max_length=50)
+    city = CharField(max_length=60)
+    country = CharField(max_length=50)
+    website = CharField(max_length=50)
 
 
-class Author(models.Model):
+class Author(BaseModel):
     """Author Model"""
 
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=40)
+    first_name = CharField(max_length=30)
+    last_name = CharField(max_length=40)
 
 
-class Book(models.Model):
+class Book(BaseModel):
     """Book Model"""
 
-    title = models.CharField(max_length=255)
-    description = models.TextField()
-    authors = models.ManyToManyField(Author)
-    publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE)
-    publication_date = models.DateField()
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    title = CharField(max_length=255)
+    description = TextField()
+    authors = ManyToManyField(Author, "books")
+    publisher = ForeignKeyField(Publisher, on_delete="CASCADE")
+    publication_date = DateField()
 
     def __repr__(self):
         return "Book: " + self.title + " is added."
 
     def __str__(self):
-        return f"Book #{self.pk}:  {self.title}"
+        return f"Book #{self.id}:  {self.title}"

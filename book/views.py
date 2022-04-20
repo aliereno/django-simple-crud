@@ -9,9 +9,9 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from book.models import Author, Publisher
+from book.models import Author, Book, Publisher
 from book.serializers import AuthorSerializer, BookSerializer, PublisherSerializer
-from book.services import BookService
+from book.services import AuthorService, BookService, PublisherService
 
 
 class BookListAPIView(APIView):
@@ -21,24 +21,21 @@ class BookListAPIView(APIView):
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
-        self.book_service = BookService(self.serializer_class)
+        self.book_service = BookService(Book, self.serializer_class)
 
     def get(self, request: Request):
-        book_list = self.book_service.get_all_books()
+        book_list = self.book_service.get_all_objects()
 
         results: Any = self.paginator.paginate_queryset(
-            book_list.data, request, view=self  # type: ignore
+            self.book_service.get_serialized(book_list, many=True).data, request, view=self  # type: ignore
         )
         return self.paginator.get_paginated_response(results)
 
     def post(self, request: Request):
-        serializer = self.book_service.create_book(request.data)
+        self.book_service.create_book(request.data)
 
         return Response(
-            data={
-                "message": "Book Created Successfully",
-                "data": serializer.data,
-            },
+            data={"message": "Book Created Successfully"},
             status=status.HTTP_201_CREATED,
         )
 
@@ -49,44 +46,119 @@ class BookDetailAPIView(APIView):
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
-        self.book_service = BookService(self.serializer_class)
+        self.book_service = BookService(Book, self.serializer_class)
 
     def get(self, request: Request, pk: str, format=None):
-        serializer = self.book_service.get_book(pk)
-        return Response(serializer.data)
+        book_object = self.book_service.get_object(pk)
+        serialized = self.book_service.get_serialized(book_object)
+        return Response(serialized.initial_data)
 
     def put(self, request: Request, pk: str):
-        serializer = self.book_service.update_book(pk, request.data)
+        self.book_service.update_book(pk, request.data)
 
-        return Response(
-            {"message": "Book Updated Successfully", "data": serializer.data}
-        )
+        return Response({"message": "Book Updated Successfully"})
 
     def delete(self, request: Request, pk: str):
-        self.book_service.delete_book(pk)
+        self.book_service.delete_object(pk)
 
         return Response({"message": "Book Deleted Successfully"})
 
 
-class AuthorListCreateAPIView(generics.ListCreateAPIView):
-    queryset = Author.objects.order_by("pk").all()
+class AuthorListAPIView(APIView):
+    serializer_class = AuthorSerializer
+    paginator = PageNumberPagination()
+    permission_classes = [permissions.AllowAny]
+
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.author_service = AuthorService(Author, self.serializer_class)
+
+    def get(self, request: Request):
+        author_list = self.author_service.get_all_objects()
+
+        results: Any = self.paginator.paginate_queryset(
+            self.author_service.get_serialized(author_list, many=True).data, request, view=self  # type: ignore
+        )
+        return self.paginator.get_paginated_response(results)
+
+    def post(self, request: Request):
+        self.author_service.create_object(request.data)
+
+        return Response(
+            data={"message": "Author Created Successfully"},
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class AuthorDetailAPIView(APIView):
     serializer_class = AuthorSerializer
     permission_classes = [permissions.AllowAny]
 
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.author_service = AuthorService(Author, self.serializer_class)
 
-class AuthorRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Author.objects.order_by("pk").all()
-    serializer_class = AuthorSerializer
+    def get(self, request: Request, pk: str, format=None):
+        author_object = self.author_service.get_object(pk)
+        serialized = self.author_service.get_serialized(author_object)
+        return Response(serialized.initial_data)
+
+    def put(self, request: Request, pk: str):
+        self.author_service.update_object(pk, request.data)
+
+        return Response({"message": "Author Updated Successfully"})
+
+    def delete(self, request: Request, pk: str):
+        self.author_service.delete_object(pk)
+
+        return Response({"message": "Author Deleted Successfully"})
+
+
+class PublisherListAPIView(APIView):
+    serializer_class = PublisherSerializer
+    paginator = PageNumberPagination()
     permission_classes = [permissions.AllowAny]
 
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.publisher_service = PublisherService(Publisher, self.serializer_class)
 
-class PublisherListCreateAPIView(generics.ListCreateAPIView):
-    queryset = Author.objects.order_by("pk").all()
-    serializer_class = AuthorSerializer
-    permission_classes = [permissions.AllowAny]
+    def get(self, request: Request):
+        publisher_list = self.publisher_service.get_all_objects()
+
+        results: Any = self.paginator.paginate_queryset(
+            self.publisher_service.get_serialized(publisher_list, many=True).data, request, view=self  # type: ignore
+        )
+        return self.paginator.get_paginated_response(results)
+
+    def post(self, request: Request):
+        self.publisher_service.create_object(request.data)
+
+        return Response(
+            data={"message": "Publisher Created Successfully"},
+            status=status.HTTP_201_CREATED,
+        )
 
 
-class PublisherRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Publisher.objects.order_by("pk").all()
+class PublisherDetailAPIView(APIView):
     serializer_class = PublisherSerializer
     permission_classes = [permissions.AllowAny]
+
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.publisher_service = PublisherService(Publisher, self.serializer_class)
+
+    def get(self, request: Request, pk: str, format=None):
+        publisher_object = self.publisher_service.get_object(pk)
+        serialized = self.publisher_service.get_serialized(publisher_object)
+        return Response(serialized.initial_data)
+
+    def put(self, request: Request, pk: str):
+        self.publisher_service.update_object(pk, request.data)
+
+        return Response({"message": "Publisher Updated Successfully"})
+
+    def delete(self, request: Request, pk: str):
+        self.publisher_service.delete_object(pk)
+
+        return Response({"message": "Publisher Deleted Successfully"})

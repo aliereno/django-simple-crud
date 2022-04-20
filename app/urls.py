@@ -1,7 +1,6 @@
 """
 Main URLs
 """
-from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import (
     SpectacularAPIView,
@@ -10,7 +9,6 @@ from drf_spectacular.views import (
 )
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
     path("api/v1/", include("book.urls", namespace="v1")),
     # DOCS
     path(

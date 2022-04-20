@@ -10,4 +10,4 @@ install:
 run:
 	python manage.py runserver
 test:
-	python manage.py test
+	DB_PATH=test_dbenv.sqlite3 python manage.py test
