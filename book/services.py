@@ -1,12 +1,14 @@
 """
 Services of Book App
 """
+from typing import Any
+
 from django.http import Http404
 from peewee import Model
 from playhouse.shortcuts import model_to_dict
 from rest_framework.serializers import Serializer
 
-from book.models import Author, Book, Publisher
+from book.models import Author, Book
 
 
 class BaseService:
@@ -28,12 +30,12 @@ class BaseService:
 
     def create_object(self, create_data):
         self.validate_request(create_data)
-        new_object = self.model.create(**create_data)
+        self.model.create(**create_data)
         return True
 
     def update_object(self, pk: str, update_data) -> bool:
         self.validate_request(update_data)
-        object_to_update = self._get_object(pk)
+        self._get_object(pk)
 
         update_query = self.model.update(**update_data).where(self.model.id == pk)
         update_query.execute()
@@ -44,23 +46,13 @@ class BaseService:
         object_to_delete.delete_instance()
         return True
 
-    def get_serialized(self, data, many=False) -> Serializer:
+    def to_dict(self, data, many=False) -> Any:
         if many:
-            serialized = self.serializer(
-                data=[
-                    model_to_dict(item, recurse=True, backrefs=True, manytomany=True)
-                    for item in data
-                ],
-                many=many,
-            )
-        else:
-            serialized = self.serializer(
-                data=model_to_dict(data, recurse=True, backrefs=True, manytomany=True),
-                many=False,
-            )
-
-        serialized.is_valid(raise_exception=False)
-        return serialized
+            return [
+                model_to_dict(item, recurse=True, backrefs=True, manytomany=True)
+                for item in data
+            ]
+        return model_to_dict(data, recurse=True, backrefs=True, manytomany=True)
 
     def validate_request(self, data):
         serialized = self.serializer(data=data)

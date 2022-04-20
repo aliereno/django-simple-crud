@@ -1,12 +1,11 @@
-
-from datetime import datetime
 import os
-from peewee import *
-
+from datetime import datetime
 from pathlib import Path
 
+from peewee import DateTimeField, Model, SqliteDatabase
+
 BASE_DIR = Path(__file__).resolve().parent.parent
-database_name = BASE_DIR / os.environ.get("DB_PATH", 'db.sqlite3')
+database_name = BASE_DIR / os.environ.get("DB_PATH", "db.sqlite3")
 db = SqliteDatabase(database_name)
 
 
@@ -22,8 +21,8 @@ def create_tables(model, *extra_models):
 
     # delete BaseModel
     if BaseModel in models:
-        models.pop(models.index(BaseModel), None) 
-    
+        models.pop(models.index(BaseModel), None)
+
     for m in extra_models:
         models.append(m)
 

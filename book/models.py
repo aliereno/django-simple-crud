@@ -1,7 +1,7 @@
 """
 Models of Book App
 """
-from peewee import *
+from peewee import CharField, DateField, ForeignKeyField, ManyToManyField, TextField
 
 from db.base import BaseModel
 

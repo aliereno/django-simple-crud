@@ -1,4 +1,4 @@
-# Simple CRUD with Django and DRF
+# Simple CRUD with Django and Peewee ORM
 
 ### Installation:
 

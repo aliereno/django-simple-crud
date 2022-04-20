@@ -2,7 +2,6 @@ import json
 from datetime import datetime
 
 from django.urls import reverse
-from peewee import *
 from rest_framework import status
 
 from book.models import Author, Book, Publisher

@@ -3,7 +3,7 @@ Views of Book App
 """
 from typing import Any
 
-from rest_framework import generics, permissions, status
+from rest_framework import permissions, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -27,7 +27,7 @@ class BookListAPIView(APIView):
         book_list = self.book_service.get_all_objects()
 
         results: Any = self.paginator.paginate_queryset(
-            self.book_service.get_serialized(book_list, many=True).data, request, view=self  # type: ignore
+            self.book_service.to_dict(book_list, many=True), request, view=self
         )
         return self.paginator.get_paginated_response(results)
 
@@ -50,8 +50,8 @@ class BookDetailAPIView(APIView):
 
     def get(self, request: Request, pk: str, format=None):
         book_object = self.book_service.get_object(pk)
-        serialized = self.book_service.get_serialized(book_object)
-        return Response(serialized.initial_data)
+        serialized = self.book_service.to_dict(book_object)
+        return Response(serialized)
 
     def put(self, request: Request, pk: str):
         self.book_service.update_book(pk, request.data)
@@ -77,7 +77,7 @@ class AuthorListAPIView(APIView):
         author_list = self.author_service.get_all_objects()
 
         results: Any = self.paginator.paginate_queryset(
-            self.author_service.get_serialized(author_list, many=True).data, request, view=self  # type: ignore
+            self.author_service.to_dict(author_list, many=True), request, view=self
         )
         return self.paginator.get_paginated_response(results)
 
@@ -100,8 +100,8 @@ class AuthorDetailAPIView(APIView):
 
     def get(self, request: Request, pk: str, format=None):
         author_object = self.author_service.get_object(pk)
-        serialized = self.author_service.get_serialized(author_object)
-        return Response(serialized.initial_data)
+        serialized = self.author_service.to_dict(author_object)
+        return Response(serialized)
 
     def put(self, request: Request, pk: str):
         self.author_service.update_object(pk, request.data)
@@ -127,7 +127,9 @@ class PublisherListAPIView(APIView):
         publisher_list = self.publisher_service.get_all_objects()
 
         results: Any = self.paginator.paginate_queryset(
-            self.publisher_service.get_serialized(publisher_list, many=True).data, request, view=self  # type: ignore
+            self.publisher_service.to_dict(publisher_list, many=True),
+            request,
+            view=self,
         )
         return self.paginator.get_paginated_response(results)
 
@@ -150,8 +152,8 @@ class PublisherDetailAPIView(APIView):
 
     def get(self, request: Request, pk: str, format=None):
         publisher_object = self.publisher_service.get_object(pk)
-        serialized = self.publisher_service.get_serialized(publisher_object)
-        return Response(serialized.initial_data)
+        serialized = self.publisher_service.to_dict(publisher_object)
+        return Response(serialized)
 
     def put(self, request: Request, pk: str):
         self.publisher_service.update_object(pk, request.data)

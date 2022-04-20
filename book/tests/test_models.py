@@ -1,7 +1,5 @@
 from datetime import datetime
 
-from peewee import *
-
 from book.models import Author, Book, Publisher
 from book.tests import BaseTestCase
 
